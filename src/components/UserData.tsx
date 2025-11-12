@@ -1,8 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { apiUrl, Service } from "@hex-labs/core";
-import { SimpleGrid, Text } from "@chakra-ui/react";
+import {
+  Button,
+  SimpleGrid,
+  Text,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  ModalCloseButton,
+  Box,
+} from "@chakra-ui/react";
 import axios from "axios";
 import UserCard from "./UserCard";
+
+enum SortBy {
+  FIRST = "first",
+  LAST = "last"
+}
+
+interface User {
+  userId: string;
+  name: {
+    first: string;
+    last: string;
+  };
+  email: string;
+  phoneNumber?: string;
+}
 
 const UserData: React.FC = () => {
 
@@ -13,6 +41,8 @@ const UserData: React.FC = () => {
   // element being the function to update the state.
 
   const [users, setUsers] = useState<any[]>([]);
+  const [modalUser, setModalUser] = useState<User | null>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   // The useEffect hook basicaly runs the code inside of it when the component
   // mounts. This is useful for making API calls and other things that should
@@ -27,21 +57,14 @@ const UserData: React.FC = () => {
 
     const getUsers = async () => {
 
-      // TODO: Use the apiUrl() function to make a request to the /users endpoint of our USERS service. The first argument is the URL
-      // of the request, which is created for the hexlabs api through our custom function apiUrl(), which builds the request URL based on
-      // the Service enum and the following specific endpoint URL.
 
-      // TODO: Also explore some of the other ways to configure the api call such as filtering and pagination.
-      // Try to filter all the users with phone numbers starting with 470 or increase the amount of users returned from the default 50 (don't go above 100).
+      // builds url endpoint at users/hexlabs for the USERS service
+      const URL = apiUrl(Service.USERS, "users/hexlabs");
 
-      // Postman will be your best friend here, because it's better to test out the API calls in Postman before implementing them here.
+      // fetches data using axios from the URL
+      const { data } = await axios.get(URL);
 
-      // this is the endpoint you want to hit, but don't just hit it directly using axios, use the apiUrl() function to make the request
-      const URL = 'https://users.api.hexlabs.org/users/hexlabs';
-
-      // uncomment the line below to test if you have successfully made the API call and retrieved the data. The below line takes
-      // the raw request response and extracts the actual data that we need from it.
-      // setUsers(data?.data?.profiles);
+      setUsers(data);
     };
     document.title = "Hexlabs Users"
     getUsers();
@@ -51,27 +74,72 @@ const UserData: React.FC = () => {
   // run every time a variable changes, you can put that variable in the array
   // and it will run every time that variable changes.
 
+  const openUserModal = (user: User) => {
+    setModalUser(user);
+    onOpen();
+  }
 
-  // TODO: Create a function that sorts the users array based on the first name of the users. Then, create a button that
-  // calls this function and sorts the users alphabetically by first name. You can use the built in sort() function to do this.
+  const sortByName = (field: SortBy) => {
+    const sortedUsers = [...users].sort((a, b) => {
+      const lastA = a.name?.[field]?.toLowerCase() || "";
+      const lastB = b.name?.[field]?.toLowerCase() || "";
+      return lastA.localeCompare(lastB);
+    });
+    setUsers(sortedUsers);
+  };
+
 
 
   return (
     <>
       <Text fontSize="4xl">Hexlabs Users</Text>
       <Text fontSize="2xl">This is an example of a page that makes an API call to the Hexlabs API to get a list of users.</Text>
-
-
+      <Button colorScheme="blue" onClick={() => sortByName(SortBy.FIRST)}>
+        Sort by first name
+      </Button>
+      <Button colorScheme="blue" onClick={() => sortByName(SortBy.LAST)}>
+        Sort by last name
+      </Button>
       <SimpleGrid columns={[2, 3, 5]} spacing={6} padding={10}>
 
         {/* Here we are mapping every entry in our users array to a unique UserCard component, each with the unique respective
         data of each unique user in our array. This is a really important concept that we use a lot so be sure to familiarize
         yourself with the syntax - compartmentalizing code makes your work so much more readable. */}
         { users.map((user) => (
-          <UserCard user={user} />
+          <Box key={user.userId} onClick={() => openUserModal(user)}>
+            <UserCard user={user} />
+          </Box>
         ))}
 
       </SimpleGrid>
+
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+       <ModalOverlay />
+       <ModalContent>
+        <ModalHeader>User Details</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>
+            {modalUser ? (
+              <>
+                <Text fontWeight="bold">
+                  {modalUser.name.first} {modalUser.name.last}
+                </Text>
+                <Text>Email: {modalUser.email}</Text>
+                {modalUser.phoneNumber && (
+                  <Text>Phone: {modalUser.phoneNumber}</Text>
+                )}
+              </>
+            ) : (
+              <Text>No user selected.</Text>
+            )}
+        </ModalBody>
+        <ModalFooter>
+          <Button colorScheme="blue" onClick={onClose}>
+            Close
+          </Button>
+        </ModalFooter>
+       </ModalContent>
+      </Modal>
     </>
   );
 };
