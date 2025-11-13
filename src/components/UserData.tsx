@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import UserCard from "./UserCard";
-import UserModal from "./UserModal"; // ✅ Import your modal
+import UserModal from "./UserModal";
 
 enum SortBy {
   FIRST = "first",
@@ -76,7 +76,6 @@ const UserData: React.FC = () => {
         ))}
       </SimpleGrid>
 
-      {/* ✅ Use the extracted modal here */}
       <UserModal isOpen={isOpen} onClose={onClose} user={modalUser} />
     </>
   );

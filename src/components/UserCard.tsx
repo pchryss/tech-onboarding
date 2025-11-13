@@ -23,8 +23,8 @@ const UserCard: React.FC<Props> = (props: Props) => {
     alignItems="center"
     transition="background-color 0.2s ease"
     _hover={{
-      backgroundColor: "gray.100", // light mode hover
-      _dark: { backgroundColor: "gray.700" }, // dark mode hover
+      backgroundColor: "gray.100",
+      _dark: { backgroundColor: "gray.700" },
       cursor: "pointer",
     }}
     >

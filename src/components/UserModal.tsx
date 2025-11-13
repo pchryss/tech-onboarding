@@ -106,7 +106,6 @@ const UserModal: React.FC<Props> = ({ isOpen, onClose, user }) => {
         </ModalContent>
       </Modal>
 
-      {/* ✅ Nested "UserApplied" modal with userId passed in */}
       <UserApplied
         isOpen={isAppliedOpen}
         onClose={onAppliedClose}

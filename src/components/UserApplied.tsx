@@ -35,13 +35,12 @@ const UserApplied: React.FC<UserAppliedProps> = ({ isOpen, onClose, userId }) =>
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isOpen || !userId) return; // only load when modal opens and userId exists
+    if (!isOpen || !userId) return;
 
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        // 1️⃣ Fetch user's applications
         const applicationsUrl = apiUrl(Service.REGISTRATION, "applications");
         const { data: applicationsResponse } = await axios.get(applicationsUrl, {
           params: { userId },
@@ -50,11 +49,9 @@ const UserApplied: React.FC<UserAppliedProps> = ({ isOpen, onClose, userId }) =>
         const applications = applicationsResponse.applications || [];
         const hexathonIds = applications.map((a: any) => a.hexathon);
 
-        // 2️⃣ Fetch all hexathons
         const hexathonsUrl = apiUrl(Service.HEXATHONS, "hexathons");
         const { data: allHexathons } = await axios.get(hexathonsUrl);
 
-        // 3️⃣ Filter user’s applied hexathons
         const applied = allHexathons.filter((h: any) =>
           hexathonIds.includes(h._id)
         );
